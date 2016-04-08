@@ -91,6 +91,11 @@ public class Keyspace
     {
         initialized = true;
     }
+    
+    public static boolean getInitialized()
+    {
+        return initialized;
+    }
 
     public static Keyspace open(String keyspaceName)
     {

@@ -2390,6 +2390,7 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
 
     public int forceKeyspaceCleanup(int jobs, String keyspaceName, String... columnFamilies) throws IOException, ExecutionException, InterruptedException
     {
+        throwIfNotInitialized();
         if (keyspaceName.equals(Keyspace.SYSTEM_KS))
             throw new RuntimeException("Cleanup of the system keyspace is neither necessary nor wise");
 
@@ -2415,6 +2416,7 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
 
     public int scrub(boolean disableSnapshot, boolean skipCorrupted, boolean checkData, int jobs, String keyspaceName, String... columnFamilies) throws IOException, ExecutionException, InterruptedException
     {
+        throwIfNotInitialized();
         CompactionManager.AllSSTableOpStatus status = CompactionManager.AllSSTableOpStatus.SUCCESSFUL;
         for (ColumnFamilyStore cfStore : getValidColumnFamilies(false, false, keyspaceName, columnFamilies))
         {
@@ -2431,6 +2433,7 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
 
     public int upgradeSSTables(String keyspaceName, boolean excludeCurrentVersion, int jobs, String... columnFamilies) throws IOException, ExecutionException, InterruptedException
     {
+        throwIfNotInitialized();
         CompactionManager.AllSSTableOpStatus status = CompactionManager.AllSSTableOpStatus.SUCCESSFUL;
         for (ColumnFamilyStore cfStore : getValidColumnFamilies(true, true, keyspaceName, columnFamilies))
         {
@@ -2440,9 +2443,10 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
         }
         return status.statusCode;
     }
-
+    
     public void forceKeyspaceCompaction(String keyspaceName, String... columnFamilies) throws IOException, ExecutionException, InterruptedException
     {
+        throwIfNotInitialized();
         for (ColumnFamilyStore cfStore : getValidColumnFamilies(true, false, keyspaceName, columnFamilies))
         {
             cfStore.forceMajorCompaction();
@@ -2461,7 +2465,7 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
             throw new IOException("Cannot snapshot until bootstrap completes");
         if (tag == null || tag.equals(""))
             throw new IOException("You must supply a snapshot name.");
-
+        throwIfNotInitialized();
         Iterable<Keyspace> keyspaces;
         if (keyspaceNames.length == 0)
         {
@@ -2498,6 +2502,7 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
             throw new IOException("You must supply a keyspace name");
         if (operationMode.equals(Mode.JOINING))
             throw new IOException("Cannot snapshot until bootstrap completes");
+        throwIfNotInitialized();
 
         if (columnFamilyName == null)
             throw new IOException("You must supply a column family name");
@@ -2528,6 +2533,7 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
     public void takeMultipleColumnFamilySnapshot(String tag, String... columnFamilyList)
             throws IOException
     {
+        throwIfNotInitialized();
         Map<Keyspace, List<String>> keyspaceColumnfamily = new HashMap<Keyspace, List<String>>();
         for (String columnFamily : columnFamilyList)
         {
@@ -2593,6 +2599,7 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
      */
     public void clearSnapshot(String tag, String... keyspaceNames) throws IOException
     {
+        throwIfNotInitialized();
         if(tag == null)
             tag = "";
 
@@ -2749,6 +2756,7 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
      */
     public void forceKeyspaceFlush(String keyspaceName, String... columnFamilies) throws IOException
     {
+        throwIfNotInitialized();
         for (ColumnFamilyStore cfStore : getValidColumnFamilies(true, false, keyspaceName, columnFamilies))
         {
             logger.debug("Forcing flush on keyspace {}, CF {}", keyspaceName, cfStore.name);
@@ -2777,6 +2785,7 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
 
     public int forceRepairAsync(String keyspace, int parallelismDegree, Collection<String> dataCenters, Collection<String> hosts, boolean primaryRange, boolean fullRepair, String... columnFamilies)
     {
+        throwIfNotInitialized();
         if (parallelismDegree < 0 || parallelismDegree > RepairParallelism.values().length - 1)
         {
             throw new IllegalArgumentException("Invalid parallelism degree specified: " + parallelismDegree);
@@ -4359,6 +4368,7 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
 
     public void rebuildSecondaryIndex(String ksName, String cfName, String... idxNames)
     {
+        
         ColumnFamilyStore.rebuildSecondaryIndex(ksName, cfName, idxNames);
     }
 
@@ -4430,4 +4440,11 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
         DatabaseDescriptor.setHintedHandoffThrottleInKB(throttleInKB);
         logger.info(String.format("Updated hinted_handoff_throttle_in_kb to %d", throttleInKB));
     }
+    
+    private void throwIfNotInitialized()
+    {
+        if (!initialized)
+            throw new IllegalStateException("Can not execute command because startup is not complete.");
+    }
+    
 }
