@@ -30,7 +30,6 @@ import org.apache.cassandra.hints.HintsService;
  *
  * TODO: remove in 4.0.
  */
-@SuppressWarnings("deprecation")
 @Deprecated
 public final class HintedHandOffManager implements HintedHandOffManagerMBean
 {

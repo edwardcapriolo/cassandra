@@ -46,6 +46,7 @@ import static org.apache.cassandra.io.sstable.Component.separator;
  *
  * A descriptor can be marked as temporary, which influences generated filenames.
  */
+@SuppressWarnings("deprecation")
 public class Descriptor
 {
     public static String TMP_EXT = ".tmp";

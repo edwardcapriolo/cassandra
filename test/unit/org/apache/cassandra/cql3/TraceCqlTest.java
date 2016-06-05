@@ -18,8 +18,6 @@
 
 package org.apache.cassandra.cql3;
 
-import java.util.List;
-
 import org.junit.Test;
 
 import com.datastax.driver.core.PreparedStatement;

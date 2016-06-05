@@ -66,6 +66,7 @@ import org.apache.cassandra.db.commitlog.CommitLogReplayer;
 @RunWith(Parameterized.class)
 public class RecoveryManagerTest
 {
+    @SuppressWarnings("unused")
     private static Logger logger = LoggerFactory.getLogger(RecoveryManagerTest.class);
 
     private static final String KEYSPACE1 = "RecoveryManagerTest1";

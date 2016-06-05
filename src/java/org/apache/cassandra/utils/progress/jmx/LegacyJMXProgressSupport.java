@@ -33,6 +33,7 @@ import static org.apache.cassandra.service.ActiveRepairService.Status;
 /**
  * ProgressListener that translates ProgressEvent to legacy JMX Notification message (backward compatibility support)
  */
+@SuppressWarnings("deprecation")
 public class LegacyJMXProgressSupport implements ProgressListener
 {
     protected static final Pattern SESSION_FAILED_MATCHER = Pattern.compile("Repair session .* for range .* failed with error .*");

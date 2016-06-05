@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 class TracingImpl extends Tracing
 {
+    @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(TracingImpl.class);
 
     public void stopSessionImpl() {

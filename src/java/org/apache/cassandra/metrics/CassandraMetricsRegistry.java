@@ -102,6 +102,7 @@ public class CassandraMetricsRegistry extends MetricRegistry
         return timer;
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends Metric> T register(MetricName name, T metric)
     {
         try

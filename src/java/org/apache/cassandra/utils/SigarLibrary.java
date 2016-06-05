@@ -28,6 +28,7 @@ public class SigarLibrary
     public static final SigarLibrary instance = new SigarLibrary();
 
     private Sigar sigar;
+    @SuppressWarnings("unused")
     private FileSystemMap mounts = null;
     private boolean initialized = false;
     private long INFINITY = -1;

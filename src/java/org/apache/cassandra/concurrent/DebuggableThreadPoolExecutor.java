@@ -22,13 +22,10 @@ import java.util.concurrent.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.cassandra.tracing.TraceState;
-import org.apache.cassandra.tracing.Tracing;
-
 import static org.apache.cassandra.tracing.Tracing.isTracing;
 
 /**
- * This class encorporates some Executor best practices for Cassandra.  Most of the executors in the system
+ * This class incorporates some Executor best practices for Cassandra.  Most of the executors in the system
  * should use or extend this.  There are two main improvements over a vanilla TPE:
  *
  * - If a task throws an exception, the default uncaught exception handler will be invoked; if there is

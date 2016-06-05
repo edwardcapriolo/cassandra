@@ -63,6 +63,7 @@ import static org.apache.cassandra.utils.FBUtilities.updateChecksumInt;
  */
 public abstract class CommitLogSegment
 {
+    @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(CommitLogSegment.class);
 
     private final static long idBase;

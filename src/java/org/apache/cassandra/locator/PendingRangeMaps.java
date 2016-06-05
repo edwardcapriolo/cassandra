@@ -11,6 +11,7 @@ import java.util.*;
 
 public class PendingRangeMaps implements Iterable<Map.Entry<Range<Token>, List<InetAddress>>>
 {
+    @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(PendingRangeMaps.class);
 
     /**

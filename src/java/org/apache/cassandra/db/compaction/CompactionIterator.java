@@ -52,6 +52,7 @@ import org.apache.cassandra.metrics.CompactionMetrics;
  */
 public class CompactionIterator extends CompactionInfo.Holder implements UnfilteredPartitionIterator
 {
+    @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(CompactionIterator.class);
     private static final long UNFILTERED_TO_UPDATE_PROGRESS = 100;
 

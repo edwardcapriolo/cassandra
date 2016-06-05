@@ -37,6 +37,7 @@ import org.apache.cassandra.utils.ByteBufferUtil;
  */
 public abstract class Constants
 {
+    @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(Constants.class);
 
     public enum Type

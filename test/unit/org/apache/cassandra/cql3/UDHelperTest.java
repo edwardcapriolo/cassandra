@@ -50,6 +50,7 @@ import org.apache.cassandra.serializers.MarshalException;
 import org.apache.cassandra.serializers.TypeSerializer;
 import org.apache.cassandra.utils.ByteBufferUtil;
 
+@SuppressWarnings("deprecation")
 public class UDHelperTest
 {
     static class UFTestCustomType extends AbstractType<String>

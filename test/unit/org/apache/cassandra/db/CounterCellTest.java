@@ -31,7 +31,6 @@ import org.apache.cassandra.SchemaLoader;
 import org.apache.cassandra.config.ColumnDefinition;
 import org.apache.cassandra.db.rows.BufferCell;
 import org.apache.cassandra.db.rows.Cell;
-import org.apache.cassandra.db.rows.CellPath;
 import org.apache.cassandra.db.rows.Cells;
 import org.apache.cassandra.db.context.CounterContext;
 import org.apache.cassandra.exceptions.ConfigurationException;
@@ -43,6 +42,7 @@ import static org.apache.cassandra.db.context.CounterContext.ContextState;
 
 public class CounterCellTest
 {
+    @SuppressWarnings("unused")
     private static final CounterContext cc = new CounterContext();
 
     private static final int idLength;

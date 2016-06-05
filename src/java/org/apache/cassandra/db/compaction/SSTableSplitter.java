@@ -29,8 +29,6 @@ public class SSTableSplitter {
 
     private final SplittingCompactionTask task;
 
-    private CompactionInfo.Holder info;
-
     public SSTableSplitter(ColumnFamilyStore cfs, LifecycleTransaction transaction, int sstableSizeInMB)
     {
         this.task = new SplittingCompactionTask(cfs, transaction, sstableSizeInMB);
@@ -45,7 +43,7 @@ public class SSTableSplitter {
     {
         public void beginCompaction(CompactionInfo.Holder ci)
         {
-            SSTableSplitter.this.info = ci;
+
         }
 
         public void finishCompaction(CompactionInfo.Holder ci)

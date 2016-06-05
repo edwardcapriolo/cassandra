@@ -37,6 +37,7 @@ import org.apache.cassandra.utils.concurrent.OpOrder;
 
 public class KeysSearcher extends CassandraIndexSearcher
 {
+    @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(KeysSearcher.class);
 
     public KeysSearcher(ReadCommand command,

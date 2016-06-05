@@ -138,7 +138,7 @@ final class HintsDescriptor
      * @return null if not using encryption; else, the initialized {@link Cipher} and a possibly updated version
      * of the {@code params} map.
      */
-    @SuppressWarnings("unchecked")
+    
     static EncryptionData createEncryption(ImmutableMap<String, Object> params)
     {
         if (params.containsKey(ENCRYPTION))
