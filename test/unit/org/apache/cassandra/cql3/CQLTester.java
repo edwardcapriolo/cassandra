@@ -193,6 +193,10 @@ public abstract class CQLTester
             FileUtils.deleteRecursive(dir);
         }
 
+        File cdcDir = new File(DatabaseDescriptor.getCDCLogLocation());
+        if (cdcDir.exists())
+            FileUtils.deleteRecursive(cdcDir);
+
         cleanupSavedCaches();
 
         // clean up data directory which are stored as data directory/keyspace/data files
@@ -674,6 +678,11 @@ public abstract class CQLTester
     {
         String currentTable = currentTable();
         return currentTable == null ? query : String.format(query, KEYSPACE + "." + currentTable);
+    }
+
+    protected ResultMessage.Prepared prepare(String query) throws Throwable
+    {
+        return QueryProcessor.prepare(formatQuery(query), ClientState.forInternalCalls(), false);
     }
 
     protected UntypedResultSet execute(String query, Object... values) throws Throwable
