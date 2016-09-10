@@ -19,6 +19,7 @@ package org.apache.cassandra.config;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 import java.nio.file.FileStore;
 import java.nio.file.Files;
@@ -832,17 +833,18 @@ public class DatabaseDescriptor
         // load the seeds for node contact points
         if (conf.seed_provider == null)
         {
-            throw new ConfigurationException("seeds configuration is missing; a minimum of one seed is required.", false);
+            throw new ConfigurationException("seed_provider must be specified.", false);
         }
         try
         {
             Class<?> seedProviderClass = Class.forName(conf.seed_provider.class_name);
-            seedProvider = (SeedProvider)seedProviderClass.getConstructor(Map.class).newInstance(conf.seed_provider.parameters);
+            seedProvider = (SeedProvider) seedProviderClass.getConstructor(Map.class).newInstance(conf.seed_provider.parameters);
         }
-        // there are about 5 checked exceptions that could be thrown here.
-        catch (Exception e)
+        catch (RuntimeException | ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e)
         {
-            throw new ConfigurationException(e.getMessage() + "\nFatal configuration error; unable to start server.  See log for stacktrace.", true);
+            throw new ConfigurationException(e.getMessage() + 
+                    System.getProperty("line.separator") +
+                    "Fatal configuration error; unable to start server.  See log for stacktrace.", true);
         }
         if (seedProvider.getSeeds().size() == 0)
             throw new ConfigurationException("The seed provider lists no seeds.", false);

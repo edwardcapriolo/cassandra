@@ -19,8 +19,16 @@ package org.apache.cassandra.locator;
 
 import java.net.InetAddress;
 import java.util.List;
+import java.util.Map;
 
-public interface SeedProvider
+public abstract class SeedProvider
 {
-    List<InetAddress> getSeeds();
+    protected final Map<String,String> properties;
+    
+    public SeedProvider(Map<String,String> properties)
+    {
+        this.properties = properties;
+    }
+    
+    public abstract List<InetAddress> getSeeds();
 }

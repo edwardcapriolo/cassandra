@@ -29,11 +29,13 @@ import org.apache.cassandra.config.DatabaseDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SimpleSeedProvider implements SeedProvider
+public class SimpleSeedProvider extends SeedProvider
 {
     private static final Logger logger = LoggerFactory.getLogger(SimpleSeedProvider.class);
 
-    public SimpleSeedProvider(Map<String, String> args) {}
+    public SimpleSeedProvider(Map<String, String> args) {
+        super(args);
+    }
 
     public List<InetAddress> getSeeds()
     {
