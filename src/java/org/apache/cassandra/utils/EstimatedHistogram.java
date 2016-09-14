@@ -28,11 +28,13 @@ import org.apache.cassandra.io.ISerializer;
 import org.apache.cassandra.io.util.DataInputPlus;
 import org.apache.cassandra.io.util.DataOutputPlus;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EstimatedHistogram
 {
     public static final EstimatedHistogramSerializer serializer = new EstimatedHistogramSerializer();
 
+    public static final Logger logger = LoggerFactory.getLogger(EstimatedHistogram.class);
     /**
      * The series of values to which the counts in `buckets` correspond:
      * 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 17, 20, etc.
@@ -195,8 +197,14 @@ public class EstimatedHistogram
         assert percentile >= 0 && percentile <= 1.0;
         int lastBucket = buckets.length() - 1;
         if (buckets.get(lastBucket) > 0)
+        {
+            if (logger.isDebugEnabled())
+            {
+                logger.debug("Overflowed histogram");
+                log(logger);
+            }
             throw new IllegalStateException("Unable to compute when histogram overflowed");
-
+        }
         long pcount = (long) Math.ceil(count() * percentile);
         if (pcount == 0)
             return 0;
