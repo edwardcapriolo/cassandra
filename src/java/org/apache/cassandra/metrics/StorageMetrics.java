@@ -18,18 +18,40 @@
 package org.apache.cassandra.metrics;
 
 import com.codahale.metrics.Counter;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 import static org.apache.cassandra.metrics.CassandraMetricsRegistry.Metrics;
+
+import java.net.InetAddress;
 
 /**
  * Metrics related to Storage.
  */
 public class StorageMetrics
 {
-    private static final MetricNameFactory factory = new DefaultNameFactory("Storage");
+    private static final DefaultNameFactory factory = new DefaultNameFactory("Storage");
+    
+    private static final LoadingCache<InetAddress, Counter> hintsInProgress = CacheBuilder.newBuilder()
+            .build(new CacheLoader<InetAddress, Counter>()
+            {
+                public Counter load(InetAddress inetAddress)
+                {
+                    return Metrics.counter(factory.createMetricName(inetAddress.getHostAddress(), "HintsInprogress"));
+                }
+            }
+
+    );
 
     public static final Counter load = Metrics.counter(factory.createMetricName("Load"));
     public static final Counter exceptions = Metrics.counter(factory.createMetricName("Exceptions"));
     public static final Counter totalHintsInProgress  = Metrics.counter(factory.createMetricName("TotalHintsInProgress"));
     public static final Counter totalHints = Metrics.counter(factory.createMetricName("TotalHints"));
+    
+    public static LoadingCache<InetAddress, Counter> getHintsInProgress()
+    {
+        return hintsInProgress;
+    }
+
 }
