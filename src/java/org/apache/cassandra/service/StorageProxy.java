@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
+import com.codahale.metrics.Counter;
 import com.google.common.base.Predicate;
 import com.google.common.cache.CacheLoader;
 import com.google.common.collect.*;
@@ -79,13 +80,7 @@ public class StorageProxy implements StorageProxyMBean
     public static final StorageProxy instance = new StorageProxy();
 
     private static volatile int maxHintsInProgress = 128 * FBUtilities.getAvailableProcessors();
-    private static final CacheLoader<InetAddress, AtomicInteger> hintsInProgress = new CacheLoader<InetAddress, AtomicInteger>()
-    {
-        public AtomicInteger load(InetAddress inetAddress)
-        {
-            return new AtomicInteger(0);
-        }
-    };
+    
     private static final ClientRequestMetrics readMetrics = new ClientRequestMetrics("Read");
     private static final ClientRequestMetrics rangeMetrics = new ClientRequestMetrics("RangeSlice");
     private static final ClientRequestMetrics writeMetrics = new ClientRequestMetrics("Write");
@@ -981,31 +976,36 @@ public class StorageProxy implements StorageProxyMBean
         }
     }
 
-    private static void checkHintOverload(InetAddress destination) throws OverloadedException
+    /**
+     *  avoid OOMing due to excess hints.  we need to do this check even for "live" nodes, since we can
+     *  still generate hints for those if it's overloaded or simply dead but not yet known-to-be-dead.
+     *  The idea is that if we have over maxHintsInProgress hints in flight, this is probably due to
+     *  a small number of nodes causing problems, so we should avoid shutting down writes completely to
+     *  healthy nodes.  Any node with no hintsInProgress is considered healthy.
+     * @param destination
+     * @throws OverloadedException when total hints and per host hits surpass thresholds
+     */
+    static void checkHintOverload(InetAddress destination)
     {
-        // avoid OOMing due to excess hints.  we need to do this check even for "live" nodes, since we can
-        // still generate hints for those if it's overloaded or simply dead but not yet known-to-be-dead.
-        // The idea is that if we have over maxHintsInProgress hints in flight, this is probably due to
-        // a small number of nodes causing problems, so we should avoid shutting down writes completely to
-        // healthy nodes.  Any node with no hintsInProgress is considered healthy.
-        if (StorageMetrics.totalHintsInProgress.getCount() > maxHintsInProgress
-                && (getHintsInProgressFor(destination).get() > 0 && shouldHint(destination)))
+        long totalHints = StorageMetrics.totalHintsInProgress.getCount();
+        long hintsForHost = getHintsInProgressFor(destination).getCount();
+        if (totalHints > maxHintsInProgress
+                && (hintsForHost > 0 && shouldHint(destination)))
         {
-            throw new OverloadedException("Too many in flight hints: " + StorageMetrics.totalHintsInProgress.getCount() +
+            throw new OverloadedException("Too many in flight hints: " + totalHints +
                                           " destination: " + destination +
-                                          " destination hints: " + getHintsInProgressFor(destination).get());
+                                          " destination hints: " + hintsForHost);
         }
     }
 
-    private static AtomicInteger getHintsInProgressFor(InetAddress destination)
+    static Counter getHintsInProgressFor(InetAddress destination)
     {
         try
         {
-            return hintsInProgress.load(destination);
-        }
-        catch (Exception e)
+            return StorageMetrics.getHintsInProgress().get(destination);
+        } catch (ExecutionException e)
         {
-            throw new AssertionError(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -1041,7 +1041,7 @@ public class StorageProxy implements StorageProxyMBean
     private static Future<Void> submitHint(HintRunnable runnable)
     {
         StorageMetrics.totalHintsInProgress.inc();
-        getHintsInProgressFor(runnable.target).incrementAndGet();
+        getHintsInProgressFor(runnable.target).inc();
         return (Future<Void>) StageManager.getStage(Stage.MUTATION).submit(runnable);
     }
 
@@ -2307,7 +2307,7 @@ public class StorageProxy implements StorageProxyMBean
             finally
             {
                 StorageMetrics.totalHintsInProgress.dec();
-                getHintsInProgressFor(target).decrementAndGet();
+                getHintsInProgressFor(target).dec();
             }
         }
 
