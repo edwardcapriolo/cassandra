@@ -78,23 +78,24 @@ public final class ThreadAwareSecurityManager extends SecurityManager
         if (installed)
             return;
         System.setSecurityManager(new ThreadAwareSecurityManager());
-
         Logger l = LoggerFactory.getLogger(ThreadAwareSecurityManager.class);
-        ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) l;
-        LoggerContext ctx = logbackLogger.getLoggerContext();
-
-        TurboFilterList turboFilterList = ctx.getTurboFilterList();
-        for (int i = 0; i < turboFilterList.size(); i++)
+        if (l instanceof ch.qos.logback.classic.Logger)
         {
-            TurboFilter turboFilter = turboFilterList.get(i);
-            if (turboFilter instanceof ReconfigureOnChangeFilter)
+            ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) l;
+            LoggerContext ctx = logbackLogger.getLoggerContext();
+
+            TurboFilterList turboFilterList = ctx.getTurboFilterList();
+            for (int i = 0; i < turboFilterList.size(); i++)
             {
-                ReconfigureOnChangeFilter reconfigureOnChangeFilter = (ReconfigureOnChangeFilter) turboFilter;
-                turboFilterList.set(i, new SMAwareReconfigureOnChangeFilter(reconfigureOnChangeFilter));
-                break;
+                TurboFilter turboFilter = turboFilterList.get(i);
+                if (turboFilter instanceof ReconfigureOnChangeFilter)
+                {
+                    ReconfigureOnChangeFilter reconfigureOnChangeFilter = (ReconfigureOnChangeFilter) turboFilter;
+                    turboFilterList.set(i, new SMAwareReconfigureOnChangeFilter(reconfigureOnChangeFilter));
+                    break;
+                }
             }
         }
-
         installed = true;
     }
 
